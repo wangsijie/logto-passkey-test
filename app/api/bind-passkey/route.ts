@@ -5,11 +5,13 @@ export async function POST(request: Request) {
     await request.json();
 
   try {
-    const data = await bindPasskeyToAccount(
+    await bindPasskeyToAccount(
       verificationRecordId,
       newIdentifierVerificationRecordId
     );
-    return Response.json(data);
+    return Response.json({
+      success: true,
+    });
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }
