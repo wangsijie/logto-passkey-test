@@ -1,10 +1,10 @@
 'use client';
 
-import { RegistrationResponseJSON, startRegistration } from "@simplewebauthn/browser";
+import { PublicKeyCredentialCreationOptionsJSON, RegistrationResponseJSON, startRegistration } from "@simplewebauthn/browser";
 import { useState } from "react";
 
 export default function PassKey() {
-  const [registrationOptions, setRegistrationOptions] = useState();
+  const [registrationOptions, setRegistrationOptions] = useState<PublicKeyCredentialCreationOptionsJSON>();
   const [newVerificationRecordId, setNewVerificationRecordId] = useState();
   const [isVerified, setIsVerified] = useState(false);
   const [passKeyResponse, setPassKeyResponse] = useState<RegistrationResponseJSON>();
@@ -37,6 +37,7 @@ export default function PassKey() {
         alert('No registration options found');
         return;
       }
+      registrationOptions.user.displayName = 'test';
       const response = await startRegistration({
         optionsJSON: registrationOptions,
       });
