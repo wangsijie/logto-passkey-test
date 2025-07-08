@@ -1,6 +1,6 @@
 'use server';
 
-import { RegistrationResponseJSON } from '@simplewebauthn/browser';
+import { RegistrationResponseJSON, AuthenticationResponseJSON } from '@simplewebauthn/browser';
 import { logtoConfig } from './logto';
 import { getAccessToken } from '@logto/next/server-actions';
 
@@ -150,4 +150,60 @@ export async function bindPasskeyToAccount(
   }
 
   return res.json();
+}
+
+export async function requestWebauthnAuthentication(
+  verificationRecordId: string
+) {
+  const accessToken = await getAccessToken(logtoConfig);
+
+  const res = await fetch(
+    `${logtoConfig.endpoint}/api/my-account/mfa-verifications/webauthn/authentication`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'logto-verification-id': verificationRecordId,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(
+      `Failed to request webauthn authentication: ${await res.text()}`
+    );
+  }
+
+  return res.json();
+}
+
+export async function verifyWebauthnAuthentication(
+  verificationRecordId: string,
+  payload: AuthenticationResponseJSON
+) {
+  const accessToken = await getAccessToken(logtoConfig);
+
+  const res = await fetch(
+    `${logtoConfig.endpoint}/api/my-account/mfa-verifications/webauthn/verify`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        verificationRecordId,
+        payload,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(
+      `Failed to verify webauthn authentication: ${await res.text()}`
+    );
+  }
+
+  return res.status === 204 ? {} : res.json();
 }
